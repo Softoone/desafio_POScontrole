@@ -1,13 +1,8 @@
 import "./App.css";
-import QrCode from "./components/QrCode";
-import Report from "./components/Report";
+import { Routes } from "./routes/Routes";
 
 function App() {
-  return (
-    <div>
-      <QrCode />
-    </div>
-  );
+  return <Routes />;
 }
 
 export default App;
