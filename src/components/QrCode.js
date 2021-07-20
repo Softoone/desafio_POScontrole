@@ -8,6 +8,7 @@ import {
   getAccessKey,
   getReport,
 } from "../services/Api.js";
+import { Link } from "react-router-dom";
 
 const QrCode = () => {
   const handleAuth = async () => {
@@ -24,10 +25,11 @@ const QrCode = () => {
       const accessKey = await getAccessKey(id);
       console.log("id token: ", id);
 
-      sessionStorage.setItem("authorized", accessKey.token);
+      localStorage.setItem("authorized", accessKey.token);
     } catch {
       window.alert(
-        "Não foi possível gerar uma chave de acesso \n" + "Tente Novamente!"
+        "Não foi possível gerar uma chave de acesso /n" +
+          "Recarregue a página e tente Novamente!"
       );
     }
   };
@@ -49,6 +51,7 @@ const QrCode = () => {
       </div>
       <div className="col-4">
         <img className="code" src={codigo} alt="QR Code Exclusivo" />
+
         <Button onClick={handleAuth}>
           <b>AUTENTICAR</b>
         </Button>

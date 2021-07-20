@@ -1,3 +1,5 @@
+import { getReport } from "../services/Api";
+
 export const currentDate = () => {
   var today = new Date(),
     date =
@@ -8,3 +10,5 @@ export const currentDate = () => {
       today.getDate();
   return date;
 };
+
+export const isAuthenticated = () => !!localStorage.getItem("authorized");

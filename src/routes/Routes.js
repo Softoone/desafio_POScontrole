@@ -1,14 +1,13 @@
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import QrCode from "../components/QrCode";
 import Report from "../components/Report";
+import PrivateRoute from "./PrivateRoute";
 
 export const Routes = () => {
   return (
-    <BrowserRouter>
-      <Switch>
-        <Route exact path="/" component={QrCode} />
-        <Route path="/report" component={Report} />
-      </Switch>
-    </BrowserRouter>
+    <Switch>
+      <Route exact path="/" component={QrCode} />
+      <PrivateRoute path="/report" component={Report} />
+    </Switch>
   );
 };

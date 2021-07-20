@@ -1,3 +1,4 @@
+import React from "react";
 import { Row, Progress, Button } from "reactstrap";
 import "../styles/Report.css";
 import { getReport } from "../services/Api";
@@ -23,30 +24,45 @@ import {
   Tooltip,
 } from "recharts";
 import { useEffect, useState } from "react";
+import { Redirect } from "react-router-dom";
 
 const Report = () => {
-  const [reportData, setReportData] = useState([]);
-  const [value, setValue] = useState(3);
+  const [avgScore, setAvgScore] = useState([]);
   const [totalRates, setTotalRates] = useState([]);
+  const [percentageAvg, setPercentageAvg] = useState([]);
+  const [weekDay, setWeekDay] = useState([]);
+  const [month, setMonth] = useState([]);
+  const [isStart, setIsStart] = useState(false);
 
   const getData = async () => {
     try {
-      const { data } = await getReport(sessionStorage.getItem("authorized"));
+      const { data } = await getReport(localStorage.getItem("authorized"));
       return data;
     } catch {
       window.alert("Incapaz de gerar informações...Volte para autenticação!");
     }
   };
+
+  function totalReviews(item) {
+    const soma = item.one + item.two + item.three + item.four + item.five;
+    return soma;
+  }
+
   useEffect(() => {
     getData()
-      .then(async (response) => {
-        await setReportData(response);
-        await setTotalRates(response.amount);
-        console.log(reportData);
+      .then((response) => {
+        setAvgScore(response.avgScore);
+        setTotalRates(response.amount);
+        setPercentageAvg(response.percentageAvgScore);
+        setWeekDay(response.byWeekDay);
+        setMonth(response.byMonth);
+        console.log(response);
         console.log(totalRates);
+        console.log(percentageAvg);
+        setIsStart(true);
       })
       .catch((error) => {
-        console.error("Erro no retorno de DataAPI");
+        console.error(error);
         window.alert(
           "Erro na renderização dos componentes...Verifique elementos da página e tente novamente!"
         );
@@ -84,10 +100,6 @@ const Report = () => {
     },
   ];
 
-  function totalReviews(v1, v2, v3, v4, v5) {
-    const soma = v1 + v2 + v3 + v4 + v5;
-    return soma;
-  }
   /* function verInfo() {
     console.log(data);
   } */
@@ -95,12 +107,12 @@ const Report = () => {
     <Row>
       {/*<Button onClick={verInfo}>Ver info Console</Button>*/}
       <div className="col-11">
-        <h1>Hello Chart</h1>
-        <ResponsiveContainer width="90%" aspect={3}>
+        <h1>Média ao longo do tempo</h1>
+        <ResponsiveContainer width="75%" aspect={4}>
           <BarChart
             width={500}
             height={300}
-            data={chartData}
+            data={weekDay}
             margin={{
               top: 5,
               right: 30,
@@ -109,40 +121,60 @@ const Report = () => {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="field" />
             <YAxis />
             <Tooltip />
 
-            <Bar dataKey="pv" fill="#8884d8" />
-            <Bar dataKey="uv" fill="#82ca9d" />
+            <Bar dataKey="score" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="col-10">
+        <div>
+          <div className="text-center">0%</div>
+          <Progress />
+          <div className="text-center">25%</div>
+          <Progress value="25" />
+          <div className="text-center">50%</div>
+          <Progress value={50} />
+          <div className="text-center">75%</div>
+          <Progress value={75} />
+          <div className="text-center">100%</div>
+          <Progress value="100" />
+          <div className="text-center">Multiple bars</div>
+          <Progress multi>
+            <Progress bar value="15" />
+            <Progress bar color="success" value="30" />
+            <Progress bar color="info" value="25" />
+            <Progress bar color="warning" value="20" />
+            <Progress bar color="danger" value="5" />
+          </Progress>
+        </div>
         <TableContainer component={Paper}>
           <Table className="ss" aria-label="simple table">
             <TableHead>
               <p>Avaliações por estrela</p>
               <TableRow>
                 <TableCell>
-                  <Box component="fieldset" mb={3} borderColor="transparent">
-                    <Rating
-                      name="read-only size-large"
-                      size="large"
-                      value={reportData.avgScore}
-                      precision={0.5}
-                      readOnly
-                    />
-                  </Box>
+                  {isStart && (
+                    <Box component="fieldset" mb={3} borderColor="transparent">
+                      <Rating
+                        name="read-only size-large half-rating-read"
+                        size="large"
+                        value={avgScore}
+                        precision={0.5}
+                        readOnly
+                      />
+                    </Box>
+                  )}
                 </TableCell>
                 <TableCell align="right"></TableCell>
                 <TableCell align="right"></TableCell>
-                <TableCell align="right"></TableCell>
                 <TableCell align="right">
-                  <b>{reportData.avgScore}</b> estrelas <br></br> Média entre{" "}
-                  {totalReviews(totalRates)}
-                  opiniões
+                  <b>{avgScore}</b>
+                  <br></br> estrelas <br></br> Média entre{" "}
+                  {totalReviews(totalRates)} opiniões
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -154,44 +186,49 @@ const Report = () => {
                   </TableCell>  */}
               <TableRow>
                 <TableCell align="left">5</TableCell>
-                <TableCell align="left"></TableCell>
+                <TableCell align="left">XYXY</TableCell>
                 <TableCell align="center"></TableCell>
                 <TableCell align="right">
-                  {totalRates.five}(Porcentagem)
+                  <b>{totalRates.five}</b>
+                  {"(" + percentageAvg.five + "%)"}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align="left">4</TableCell>
-                <TableCell align="left"></TableCell>
+                <TableCell align="left">XYXY</TableCell>
                 <TableCell align="center">
                   <Progress />
                 </TableCell>
                 <TableCell align="right">
-                  {totalRates.four}(Porcentagem)
+                  {totalRates.four}
+                  {"(" + percentageAvg.four + "%)"}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align="left">3</TableCell>
-                <TableCell align="left"></TableCell>
+                <TableCell align="left">XYXY</TableCell>
                 <TableCell align="center">aaaa</TableCell>
                 <TableCell align="right">
-                  {totalRates.three}(Porcentagem)
+                  {totalRates.three}
+                  {"(" + percentageAvg.three + "%)"}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align="left">2</TableCell>
-                <TableCell align="left"></TableCell>
+                <TableCell align="left">XYXY</TableCell>
                 <TableCell align="center">aaa</TableCell>
                 <TableCell align="right">
-                  {totalRates.two}(Porcentagem)
+                  {totalRates.two}
+                  {"(" + percentageAvg.two + "%)"}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align="left">1</TableCell>
-                <TableCell align="left"></TableCell>
+                <TableCell align="left">XYXY</TableCell>
                 <TableCell align="center">aaa</TableCell>
                 <TableCell align="right">
-                  {totalRates.one}(Porcentagem)
+                  {totalRates.one}
+                  {"(" + percentageAvg.one + "%)"}
                 </TableCell>
               </TableRow>
             </TableBody>
