@@ -11,5 +11,3 @@ Entre elas posso citar: Criação de contextAPI, códigos assíncronos, inserç�
 De outra forma posso dizer que estive satisfeito com os resultados em: Responsividade, estilização(a melhorar), dedicação intensiva ao trabalho, e a busca por novos conhecimentos.
 
 # Resultado
-
-![Image](https://{https://imgur.com/a/1MUZzpw})
