@@ -1,10 +1,8 @@
 import React from "react";
-import { Row, Progress, Button } from "reactstrap";
+import { Row, Button } from "reactstrap";
 import "../styles/Report.css";
 import { getReport } from "../services/Api";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
-import StarBorderIcon from "@material-ui/icons/StarBorder";
 import Rating from "@material-ui/lab/Rating";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -20,11 +18,11 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Legend,
   Tooltip,
 } from "recharts";
 import { useEffect, useState } from "react";
-import { Redirect } from "react-router-dom";
+import { HiStar } from "react-icons/hi";
+import { getStorage } from "../utils/Auth";
 
 const Report = () => {
   const [avgScore, setAvgScore] = useState([]);
@@ -33,10 +31,11 @@ const Report = () => {
   const [weekDay, setWeekDay] = useState([]);
   const [month, setMonth] = useState([]);
   const [isStart, setIsStart] = useState(false);
+  const [graphicView, setGraphicView] = useState(false);
 
   const getData = async () => {
     try {
-      const { data } = await getReport(localStorage.getItem("authorized"));
+      const { data } = await getReport(getStorage("authorized"));
       return data;
     } catch {
       window.alert("Incapaz de gerar informações...Volte para autenticação!");
@@ -56,10 +55,8 @@ const Report = () => {
         setPercentageAvg(response.percentageAvgScore);
         setWeekDay(response.byWeekDay);
         setMonth(response.byMonth);
-        console.log(response);
-        console.log(totalRates);
-        console.log(percentageAvg);
         setIsStart(true);
+        fillYAxis();
       })
       .catch((error) => {
         console.error(error);
@@ -69,92 +66,105 @@ const Report = () => {
       });
   }, []);
 
-  const chartData = [
-    {
-      name: "Page A",
-      uv: 4000,
-    },
-    {
-      name: "Page B",
-      uv: 3000,
-    },
-    {
-      name: "Page C",
-      uv: 2000,
-    },
-    {
-      name: "Page D",
-      uv: 2780,
-    },
-    {
-      name: "Page E",
-      uv: 1890,
-    },
-    {
-      name: "Page F",
-      uv: 2390,
-    },
-    {
-      name: "Page G",
-      uv: 3490,
-    },
-  ];
+  function chartFilter(value) {
+    value == "mês" ? setGraphicView(true) : setGraphicView(false);
+  }
 
-  /* function verInfo() {
-    console.log(data);
-  } */
+  function finishSession() {
+    localStorage.removeItem("authorized");
+    window.location.reload();
+  }
+
+  function fillYAxis() {
+    console.log(weekDay);
+    const values = [];
+    const indexNo = weekDay.length;
+
+    for (let i = 0; i < indexNo; i++) {
+      values.push(weekDay[i].score);
+    }
+
+    values.sort((a, b) => a - b);
+
+    return values[indexNo - 1];
+  }
+
   return (
-    <Row>
-      {/*<Button onClick={verInfo}>Ver info Console</Button>*/}
-      <div className="col-11">
-        <h1>Média ao longo do tempo</h1>
-        <ResponsiveContainer width="75%" aspect={4}>
-          <BarChart
-            width={500}
-            height={300}
-            data={weekDay}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="field" />
-            <YAxis />
-            <Tooltip />
+    <>
+      <Row>
+        <div className="col-10">
+          <h1>Média ao longo do tempo</h1>
+          {!graphicView ? (
+            <ResponsiveContainer width="85%" aspect={3}>
+              <BarChart
+                width={500}
+                height={300}
+                data={weekDay}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="field" />
+                <YAxis
+                  type="number"
+                  domain={[0, Math.round(avgScore + 1)]}
+                  interval={0}
+                />
+                <Tooltip />
 
-            <Bar dataKey="score" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+                <Bar dataKey="score" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="90%" aspect={3}>
+              <BarChart
+                width={500}
+                height={300}
+                data={month}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="field" />
+                <YAxis
+                  type="number"
+                  domain={[0, Math.round(avgScore + 1)]}
+                  interval={0}
+                />
+                <Tooltip />
 
-      <div className="col-10">
-        <div>
-          <div className="text-center">0%</div>
-          <Progress />
-          <div className="text-center">25%</div>
-          <Progress value="25" />
-          <div className="text-center">50%</div>
-          <Progress value={50} />
-          <div className="text-center">75%</div>
-          <Progress value={75} />
-          <div className="text-center">100%</div>
-          <Progress value="100" />
-          <div className="text-center">Multiple bars</div>
-          <Progress multi>
-            <Progress bar value="15" />
-            <Progress bar color="success" value="30" />
-            <Progress bar color="info" value="25" />
-            <Progress bar color="warning" value="20" />
-            <Progress bar color="danger" value="5" />
-          </Progress>
+                <Bar dataKey="score" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
+
+        <div className="col-1">
+          <Button id="divButtons" onClick={() => finishSession()}>
+            ENCERRAR SESSÃO
+          </Button>
+          <Button id="divButtons" onClick={() => chartFilter("dia")}>
+            VIEW POR DIA
+          </Button>
+          <Button id="divButtons" onClick={() => chartFilter("mês")}>
+            VIEW POR MÊS
+          </Button>
+        </div>
+
         <TableContainer component={Paper}>
           <Table className="ss" aria-label="simple table">
             <TableHead>
-              <p>Avaliações por estrela</p>
+              <p>
+                <b>Avaliações por estrela</b>
+              </p>
               <TableRow>
                 <TableCell>
                   {isStart && (
@@ -169,73 +179,96 @@ const Report = () => {
                     </Box>
                   )}
                 </TableCell>
-                <TableCell align="right"></TableCell>
-                <TableCell align="right"></TableCell>
+                <TableCell />
                 <TableCell align="right">
-                  <b>{avgScore}</b>
-                  <br></br> estrelas <br></br> Média entre{" "}
-                  {totalReviews(totalRates)} opiniões
+                  <b className="avgScoreLine">
+                    {avgScore}
+                    <br /> estrelas <br />
+                  </b>
+                  Média entre {totalReviews(totalRates)} opiniões
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {/* {rows.map((row) => (
-                <TableRow key={row.name}>
-                  <TableCell component="th" scope="row">
-                    {row.name}  
-                  </TableCell>  */}
               <TableRow>
-                <TableCell align="left">5</TableCell>
-                <TableCell align="left">XYXY</TableCell>
-                <TableCell align="center"></TableCell>
                 <TableCell align="right">
-                  <b>{totalRates.five}</b>
-                  {"(" + percentageAvg.five + "%)"}
+                  <p className="tableCellText">
+                    5 <HiStar className="starIcon" />
+                  </p>
                 </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell align="left">4</TableCell>
-                <TableCell align="left">XYXY</TableCell>
                 <TableCell align="center">
-                  <Progress />
+                  <progress max="100" value={percentageAvg.five}></progress>
                 </TableCell>
-                <TableCell align="right">
-                  {totalRates.four}
-                  {"(" + percentageAvg.four + "%)"}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell align="left">3</TableCell>
-                <TableCell align="left">XYXY</TableCell>
-                <TableCell align="center">aaaa</TableCell>
-                <TableCell align="right">
-                  {totalRates.three}
-                  {"(" + percentageAvg.three + "%)"}
+                <TableCell align="left">
+                  <b className="totalRatesLines">{totalRates.five}</b>
+                  {" (" + percentageAvg.five + "%)"}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell align="left">2</TableCell>
-                <TableCell align="left">XYXY</TableCell>
-                <TableCell align="center">aaa</TableCell>
                 <TableCell align="right">
-                  {totalRates.two}
-                  {"(" + percentageAvg.two + "%)"}
+                  <p className="tableCellText">
+                    4 <HiStar className="starIcon" />
+                  </p>
+                </TableCell>
+                <TableCell align="center">
+                  {" "}
+                  <progress max="100" value={percentageAvg.four}></progress>
+                </TableCell>
+                <TableCell align="left">
+                  <b className="totalRatesLines">{totalRates.four}</b>
+                  {" (" + percentageAvg.four + "%)"}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell align="left">1</TableCell>
-                <TableCell align="left">XYXY</TableCell>
-                <TableCell align="center">aaa</TableCell>
                 <TableCell align="right">
-                  {totalRates.one}
-                  {"(" + percentageAvg.one + "%)"}
+                  <p className="tableCellText">
+                    3 <HiStar className="starIcon" />
+                  </p>
+                </TableCell>
+                <TableCell align="center">
+                  {" "}
+                  <progress max="100" value={percentageAvg.three}></progress>
+                </TableCell>
+                <TableCell align="left">
+                  <b className="totalRatesLines">{totalRates.three}</b>
+                  {" (" + percentageAvg.three + "%)"}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell align="right">
+                  <p className="tableCellText">
+                    2 <HiStar className="starIcon" />
+                  </p>
+                </TableCell>
+                <TableCell align="center">
+                  {" "}
+                  <progress max="100" value={percentageAvg.two}></progress>
+                </TableCell>
+                <TableCell align="left">
+                  <b className="totalRatesLines">{totalRates.two}</b>
+                  {" (" + percentageAvg.two + "%)"}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell align="right">
+                  <p className="tableCellText">
+                    1 <HiStar className="starIcon" />
+                  </p>
+                </TableCell>
+                <TableCell align="center">
+                  {" "}
+                  <progress max="100" value={percentageAvg.one}></progress>
+                </TableCell>
+                <TableCell align="left">
+                  <b className="totalRatesLines">{totalRates.one}</b>
+                  {" (" + percentageAvg.one + "%)"}
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
-      </div>
-    </Row>
+      </Row>
+    </>
   );
 };
 

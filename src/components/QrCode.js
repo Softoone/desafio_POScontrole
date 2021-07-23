@@ -2,13 +2,9 @@ import { Button, Row } from "reactstrap";
 import codigo from "../assets/img/qr_code.jpg";
 import settings from "../assets/img/settings.jpg";
 import "../styles/QrCode.css";
-import {
-  createAuth,
-  createAccess,
-  getAccessKey,
-  getReport,
-} from "../services/Api.js";
+import { createAuth, createAccess, getAccessKey } from "../services/Api.js";
 import { Link } from "react-router-dom";
+import { setStorage } from "../utils/Auth";
 
 const QrCode = () => {
   const handleAuth = async () => {
@@ -20,12 +16,13 @@ const QrCode = () => {
         return data;
       };
 
-      const { token } = await createKey(id);
+      await createKey(id);
 
       const accessKey = await getAccessKey(id);
-      console.log("id token: ", id);
 
       localStorage.setItem("authorized", accessKey.token);
+      //setStorage(accessKey.token);
+      console.log("id token: ", accessKey.token);
     } catch {
       window.alert(
         "Não foi possível gerar uma chave de acesso /n" +
@@ -52,9 +49,11 @@ const QrCode = () => {
       <div className="col-4">
         <img className="code" src={codigo} alt="QR Code Exclusivo" />
 
-        <Button onClick={handleAuth}>
-          <b>AUTENTICAR</b>
-        </Button>
+        <Link to="/report">
+          <Button onClick={handleAuth}>
+            <b>AUTENTICAR</b>
+          </Button>
+        </Link>
       </div>
     </Row>
   );

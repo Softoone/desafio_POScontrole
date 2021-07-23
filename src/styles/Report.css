@@ -1,3 +1,57 @@
+#divButtons {
+  display: block;
+  padding: 5px;
+  margin: 10px;
+  font-weight: bold;
+}
+
+.starIcon {
+  fill: yellow;
+  width: 30px;
+  height: 30px;
+}
+
+.totalRatesLines {
+  font-size: 18px;
+}
+
+.avgScoreLine {
+  font-size: 30px;
+}
+
+progress {
+  width: 800px;
+  height: 20px;
+}
+
+@media screen and (max-width: 1200px) {
+  progress {
+    width: 450px;
+    height: 20px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  progress {
+    width: 200px;
+    height: 15px;
+  }
+}
+
+.MuiTableHead-root p {
+  margin-left: 10px;
+}
+
+.MuiTableCell-root {
+  width: 300px;
+  height: 50px;
+}
+
+.tableCellText {
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .row::after {
   content: "";
   clear: both;
@@ -18,7 +72,6 @@
   width: 25%;
   float: right;
   padding: 15px;
-
   position: relative;
 }
 .col-4 {

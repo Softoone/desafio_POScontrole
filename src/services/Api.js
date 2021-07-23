@@ -1,5 +1,5 @@
 import axios from "axios";
-import { currentDate } from "../context/Auth";
+import { currentDate } from "../utils/Auth";
 
 const apiEndpoint = "https://app-web-03-bck-rd-hmg.azurewebsites.net";
 
@@ -16,17 +16,15 @@ export const createAuth = async () => {
 };
 
 export const createAccess = async (authId) => {
-  const token = await api.post("/5estrelasfrt/auth/createAccessKey", {
+  await api.post("/5estrelasfrt/auth/createAccessKey", {
     authorizationKey: authId,
     client: "12345678901234",
     revalidate: true,
   });
-
-  return token;
 };
 
-export const getAccessKey = async (id) => {
-  const accessKey = await api.get(`/5estrelasfrt/auth/getAccessKey/${id}`);
+export const getAccessKey = async (idToken) => {
+  const accessKey = await api.get(`/5estrelasfrt/auth/getAccessKey/${idToken}`);
 
   return accessKey.data;
 };
